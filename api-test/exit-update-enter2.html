@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+
+        div {
+            background: white;
+            border: solid 1px #ccc;
+            padding: 20px;
+            margin: 20px;
+        }
+    </style>
+    <script src="js/d3.js"></script>
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+<div>update</div>
+<div>exit</div>
+<script>
+    $(document).ready(function () {
+        //http://bl.ocks.org/mbostock/5779690
+        var duration = 750;
+        //selection.enter - 返回缺失元素的占位对象（placeholder），指向绑定的数据中比选定元素集多出的一部分元素
+        //selection.data - 设置或获取一组元素的绑定数据
+        var div = d3.select("body").selectAll("div") // 选择页面上的div 元素  这时div元素可以不存在
+                .data(["enter", "update"], function(d) { return d || this.textContent; });
+
+        // <div>update</div>  绑定数据 'update'   ;
+        // <div>exit</div> 未绑定数据
+        // 同时生成一个占位对象， 该占位对象绑定数据 ‘enter’. 此时它并不存在于页面中， 直到调用  div.enter().append("div")
+
+
+        // exit 返回多余元素的元素集，即选择元素中比绑定数据多出的一部分。
+        // exit 方法返回 .data() 中不包含的选项 例如：.data(["enter", "update"])  时，  上面选择的 .selectAll("div") 中
+        // “exit” 文本值不在选择范围内  此时 <div>exit</div> 就会被返回
+
+        //transition.duration - 指定每个元素过渡的持续时间（单位：毫秒ms）。
+
+// 1. exit
+        var exitTransition = d3.transition().duration(750).each(function() {
+
+            div.exit() // 选出不在 data(["enter", "update"]) 中的 <div>exit</div>
+                    .style("background", "red")
+                    .transition()
+                    .style("opacity", 0)
+                    .remove(); //移除 <div>exit</div>
+
+
+            //console.log(div); //此时 div 中只有一个  <div>update</div>  但 length = 2; 原因是有一个占位的 ‘enter’ 对象
+        });
+        //console.log('exitTransition = ', exitTransition); // <div>update</div> 对象
+
+
+
+// 2. update
+        var updateTransition = exitTransition.transition().each(function() {
+            //console.log(div);
+            div.transition()
+                    .style("background", "orange");
+        });
+
+        //selection.enter - 返回缺失元素的占位对象（placeholder），指向绑定的数据中比选定元素集多出的一部分元素。
+        // 以 data(["enter", "update"]）
+
+        //console.log('updateTransition = ', updateTransition);  // <div>update</div> 对象
+
+
+// 3. enter
+        var enterTransition = updateTransition.transition().each(function() {
+
+            div.enter().append("div")
+                    .text(function(d) { return d + '2'; })
+                    .style("opacity", 0)
+                    .transition()
+                    .style("background", "green")
+                    .style("opacity", 1);
+
+            //console.log(div);  //此时 div 中只有两个  <div>update</div> <div>enter</div>  length = 2;
+            // 通过 div.enter().append("div") 将占位的 ‘enter’ 对象追加到页面
+            // div.enter().append("div")之后的操作只对  <div>enter</div>  有效
+        });
+
+        //console.log('enterTransition = ', enterTransition);  // <div>update</div> <div>enter</div> 对象
+
+    }); //document ready
+
+</script>
+
+
+
+</body>
+</html>
